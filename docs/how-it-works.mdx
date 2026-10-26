@@ -1,0 +1,88 @@
+---
+title: How it works
+description: Scoring rules, perspective lenses, verdict bands and knockouts used by the Idea Evaluator.
+---
+
+import LensTable from '@site/src/components/evaluator/LensTable';
+
+# How it works
+
+The evaluator answers one question: **is this a real problem worth solving, and am I the right person to solve it?**
+You score 28 criteria once. The site then views those scores from several angles.
+
+## 1. Score from evidence, not optimism
+
+Each criterion is scored **1 to 5**, and **5 is always the favourable end**. For "operational complexity", 5 means *simple to run*. For "customer acquisition cost", 5 means *cheap to acquire*.
+
+| Score | Meaning |
+|---|---|
+| 1 | Very weak. Evidence points against the idea. |
+| 2 | Weak |
+| 3 | Uncertain or average. You lean one way but cannot prove it. |
+| 4 | Strong |
+| 5 | Very strong. You have evidence: interviews, data, payments. |
+| **?** | Unknown. Leave it unscored rather than guessing. |
+
+Tick **evidence** next to a score when it is backed by something real: customer interviews, data, a pre-sale or a working prototype. The **Evidence-backed %** meter shows how much of your evaluation is fact rather than hunch.
+
+:::tip
+An honest "?" is more useful than an optimistic 4. Unknowns are not counted in any average, and they feed the **Validate next** list.
+:::
+
+## 2. Section scores and the overall score
+
+- **Section score**: the average of the scored criteria in that section (A–E).
+- **Overall score**: the average of the section scores. Each of the five areas counts equally, however many criteria it has.
+- **Coverage**: how many of the 28 criteria you have scored.
+
+## 3. Perspective lenses
+
+The same scores are re-weighted to answer the question each stakeholder cares about. A lens score is a **weighted average of the scored criteria it uses**. Unscored items are skipped, and the lens shows how much of its weight is covered.
+
+| Lens | The question it asks |
+|---|---|
+| 👤 Customer | Would I urgently want this, and is it clearly better than what I do today? |
+| 💰 Investor | Is the market big enough, are the unit economics sound, and can it become large and defensible? |
+| 🛠️ Founder / Operator | Can I build, sell and run this myself with the time, skills and cash I actually have? |
+| ⚔️ Competitor / Market | If incumbents and copycats respond, does this still win and hold its position? |
+
+Weights (● = 1, ●● = 2, ●●● = 3; ★ = critical criterion):
+
+<LensTable />
+
+A big gap between lenses is the most useful signal. An idea customers love but investors score low is often a great lifestyle business and a poor venture bet. The reverse means a big market you haven't yet proven anyone wants.
+
+## 4. Verdict
+
+A verdict appears once at least 5 criteria are scored.
+
+| Overall | Verdict |
+|---|---|
+| ≥ 4.0 | **Strong: pursue it** |
+| 3.3 – 3.9 | **Promising: validate the risks** |
+| 2.5 – 3.2 | **Weak: rework the idea** |
+| < 2.5 | **Rethink or drop it** |
+
+### Knockouts
+
+Five criteria are marked **critical**: *problem severity, customer access, willingness to pay, technical feasibility* and *distribution strategy*. A single one scored **≤ 2** caps the verdict at **Weak**, whatever the average. A great product nobody pays for, or one you cannot reach customers for, does not average out.
+
+The verdict is marked **provisional** when fewer than 60% of criteria are scored. A warning also appears when fewer than 40% of scores are evidence-backed.
+
+## 5. Red flags and "Validate next"
+
+- **Red flags**: every criterion scored 1 or 2, worst first.
+- **Validate next**: up to six cheap experiments, ordered as follows:
+  1. critical criteria scored low
+  2. critical criteria still unknown
+  3. other unknowns
+  4. scores of 3 without evidence
+
+Each comes with a concrete test, such as pre-selling for willingness to pay or a two-week spike for technical feasibility.
+
+## 6. Privacy, saving and sharing
+
+- Everything is stored **only in your browser** (localStorage). There is no server, account or tracking.
+- **Share link**: the whole idea is packed into the link itself (after the `#`). Whoever opens it gets their own copy.
+- **Backup JSON** saves all your ideas to a file. **Import JSON** restores them on any device.
+- **Print / PDF** prints a clean report. **Markdown** export works well for Notion, GitHub or docs.
