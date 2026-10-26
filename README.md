@@ -7,6 +7,7 @@ An interactive, private scorecard for answering *"Is this a real problem worth s
 - Score a business idea on **28 criteria** in 5 sections: problem, market, solution, economics, execution. Use a 1–5 scale and leave unknowns unscored.
 - Build **user personas** (profile cards with goals, frustrations, behaviour sliders, buying role).
 - Design a **Value Proposition Canvas** with fit scoring, an interactive fit matrix, ad-lib statements, a great-VP checklist and test cards.
+- Map the whole business on a **Business Model Canvas**: sticky notes, assumption vs validated, monthly economics, and pre-fill from other tabs.
 - Size the market with a **TAM / SAM / SOM** calculator and chart (bottom-up or top-down, with a revenue-goal check).
 - Analyse the industry with **Porter's Five Forces** and the strategy with the **3C model** (Customers · Company · Competitors).
 - See it through **4 perspective lenses**: Customer, Investor, Founder/Operator, Competitor.

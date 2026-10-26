@@ -7,6 +7,7 @@ import {saveState} from '../lib/store.js';
 import RadarChart from '../components/evaluator/RadarChart.js';
 import {forcesSummary, threeC, marketSizing, money} from '../lib/frameworks.js';
 import {vpcFit} from '../lib/vpc.js';
+import {bmcSummary} from '../lib/bmc.js';
 
 const COLORS = ['#4f46e5', '#e11d48', '#059669', '#d97706'];
 
@@ -25,7 +26,7 @@ function Compare() {
   const rows = useMemo(() => {
     if (!state) return [];
     return picked.map((id) => state.ideas.find((i) => i.id === id)).filter(Boolean)
-      .map((idea) => ({idea, r: evaluate(idea.scores, idea.evidence), fs: forcesSummary(idea.forces, idea.scores), cs: threeC(idea.scores), ms: marketSizing(idea.market), vf: vpcFit(idea.vpc)}));
+      .map((idea) => ({idea, r: evaluate(idea.scores, idea.evidence), fs: forcesSummary(idea.forces, idea.scores), cs: threeC(idea.scores), ms: marketSizing(idea.market), vf: vpcFit(idea.vpc), bs: bmcSummary(idea.bmc)}));
   }, [state, picked]);
 
   if (!state) return <div className="ie-loading">Loading your ideas…</div>;
@@ -102,6 +103,7 @@ function Compare() {
                 <tr key={c.id}><th>{c.icon} 3C · {c.title}</th>{rows.map(({idea, cs}) => <Cell key={idea.id} v={cs[i].score} />)}</tr>
               ))}
               <tr><th>💎 Value-proposition fit</th>{rows.map(({idea, vf}) => <td key={idea.id}>{vf.fit == null ? '–' : `${Math.round(vf.fit * 100)}%`} · {vf.great}/10 great-VP</td>)}</tr>
+              <tr><th>🧩 Business model</th>{rows.map(({idea, bs}) => <td key={idea.id}>{bs.filled}/9 blocks · {Math.round(bs.validatedPct * 100)}% validated{bs.hasMoney ? ` · ${bs.profit < 0 ? '−' : '+'}${money(Math.abs(bs.profit), idea.market.currency)}/mo` : ''}</td>)}</tr>
               <tr><th>🧑 Personas</th>{rows.map(({idea}) => <td key={idea.id} className="ie-small">{idea.personas.map((p) => `${p.avatar} ${p.name}`).join(', ') || '–'}</td>)}</tr>
               <tr><th>🎯 TAM</th>{rows.map(({idea, ms}) => <td key={idea.id}>{money(ms.tam, idea.market.currency)}</td>)}</tr>
               <tr><th>🎯 SAM</th>{rows.map(({idea, ms}) => <td key={idea.id}>{money(ms.sam, idea.market.currency)}</td>)}</tr>

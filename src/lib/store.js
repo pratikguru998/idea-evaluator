@@ -6,13 +6,15 @@ import {BLANK_MARKET, FORCES, THREE_C, CURRENCIES} from '../data/frameworks.js';
 import {forcesSummary, threeC, marketSizing, money, count, attractivenessLabel} from './frameworks.js';
 import {blankVpc, normalizeVpc, normalizePersona, vpcFit, lines, adlibText} from './vpc.js';
 import {TEST_STATUS, BUYING_ROLES, TRAITS} from '../data/vpc.js';
+import {blankBmc, normalizeBmc, bmcSummary} from './bmc.js';
+import {BMC_BLOCKS} from '../data/bmc.js';
 
 const KEY = 'idea-evaluator:v1';
 
 export const newId = () => Math.random().toString(36).slice(2, 10);
 
 export function blankIdea(name = 'Untitled idea') {
-  return {id: newId(), name, pitch: '', icp: '', scores: {}, evidence: {}, notes: {}, concerns: '', forces: {}, forceNotes: {}, c3: {}, market: {...BLANK_MARKET}, vpc: blankVpc(), personas: [], updated: Date.now()};
+  return {id: newId(), name, pitch: '', icp: '', scores: {}, evidence: {}, notes: {}, concerns: '', forces: {}, forceNotes: {}, c3: {}, market: {...BLANK_MARKET}, vpc: blankVpc(), personas: [], bmc: blankBmc(), updated: Date.now()};
 }
 
 export function loadState() {
@@ -79,6 +81,7 @@ export function normalize(raw = {}) {
     c3,
     market,
     vpc: normalizeVpc(raw.vpc),
+    bmc: normalizeBmc(raw.bmc),
     personas: (Array.isArray(raw.personas) ? raw.personas.slice(0, 12) : []).map((p, i) => normalizePersona(p, i + 1)),
     updated: Number(raw.updated) || Date.now(),
   };
@@ -253,6 +256,19 @@ export function toMarkdown(idea, r) {
       v.tests.forEach((t) => L.push(`| ${c(t.hypothesis)} | ${c(t.test)} | ${c(t.metric)} | ${c(t.criteria)} | ${TEST_STATUS.find((x) => x.id === t.status).label} | ${c(t.learning)} |`));
       L.push('');
     }
+  }
+  const bs = idea.bmc ? bmcSummary(idea.bmc) : null;
+  if (bs && bs.notes) {
+    L.push(`## Business Model Canvas (${bs.filled}/9 blocks · ${Math.round(bs.validatedPct * 100)}% validated)`, '');
+    for (const b of BMC_BLOCKS) {
+      const notes = idea.bmc[b.id].filter((n) => n.text.trim());
+      if (!notes.length) continue;
+      L.push(`**${b.icon} ${b.title}**`, ...notes.map((n) => {
+        const extra = b.money ? ` _(${b.types.find((t) => t.id === n.type)?.label}${n.amount ? `, ${money(Number(n.amount), idea.market.currency)}/mo` : ''})_` : '';
+        return `- ${n.validated ? '✓ ' : ''}${n.text}${extra}`;
+      }), '');
+    }
+    if (bs.hasMoney) L.push(`Monthly revenue ${money(bs.revenue, idea.market.currency)} − costs ${money(bs.costs, idea.market.currency)} = ${bs.profit < 0 ? '−' : ''}${money(Math.abs(bs.profit), idea.market.currency)}`, '');
   }
   if (idea.concerns) L.push('## Additional concerns, assumptions, or observations', '', idea.concerns, '');
   L.push('_★ = critical criterion · scale 1 = very weak · 3 = uncertain/average · 5 = very strong_');

@@ -100,5 +100,24 @@ export const EXAMPLE = {
       {id: 't1', hypothesis: 'Freelance designers will pre-pay for a tax-ready bookkeeping app.', test: 'Landing page in two designer communities with a $49 founding-member annual pre-sale.', metric: 'Pre-sales from 1,000 visitors', criteria: '≥ 20 pre-sales (2%)', learning: '', status: 'running'},
     ],
   },
+  bmc: {
+    kp: [{id: 'b1', text: 'Plaid (bank feeds)', color: 'yellow', validated: true}, {id: 'b2', text: 'Partner CPA firm for year-end filing', color: 'yellow', validated: false}],
+    ka: [{id: 'b3', text: 'Train & improve AI categorisation', color: 'yellow', validated: false}, {id: 'b4', text: 'Community-led marketing to designers', color: 'yellow', validated: false}],
+    kr: [{id: 'b5', text: 'Labelled dataset of creative-business expenses', color: 'yellow', validated: false}, {id: 'b6', text: 'Founder audience (2,100 newsletter subs)', color: 'yellow', validated: true}],
+    vp: [{id: 'b7', text: 'Tax-ready books in 10 minutes a month, in plain English', color: 'pink', validated: false}, {id: 'b8', text: 'Accountant-ready books and client profitability', color: 'blue', validated: false}],
+    cr: [{id: 'b9', text: 'Self-service app + monthly review nudges', color: 'pink', validated: false}, {id: 'b10', text: 'Private community of freelance creatives', color: 'yellow', validated: false}],
+    ch: [{id: 'b11', text: 'Designer Slack/Discord communities', color: 'pink', validated: true}, {id: 'b12', text: 'Newsletter sponsorships & YouTube', color: 'yellow', validated: false}, {id: 'b13', text: 'Referral credit', color: 'yellow', validated: false}],
+    cs: [{id: 'b14', text: '👩‍💻 Freelance designers (primary)', color: 'pink', validated: true}, {id: 'b15', text: '🏢 Small design studios', color: 'blue', validated: false}],
+    cost: [
+      {id: 'b16', text: 'Hosting, Plaid & LLM API', color: 'yellow', validated: false, amount: '900', type: 'variable'},
+      {id: 'b17', text: 'Founder salary', color: 'yellow', validated: false, amount: '6000', type: 'fixed'},
+      {id: 'b18', text: 'Marketing & community', color: 'yellow', validated: false, amount: '1500', type: 'fixed'},
+    ],
+    rev: [
+      {id: 'b19', text: 'Solo plan $15/mo (≈500 subscribers in year 1)', color: 'pink', validated: false, amount: '7500', type: 'subscription'},
+      {id: 'b20', text: 'Studio plan $59/mo (≈40 studios)', color: 'blue', validated: false, amount: '2360', type: 'subscription'},
+      {id: 'b21', text: 'CPA referral commission', color: 'yellow', validated: false, amount: '400', type: 'commission'},
+    ],
+  },
   concerns: 'Big incumbents could add the same AI categorisation. Need to test whether "made for designers" positioning matters or if this is just generic bookkeeping.',
 };

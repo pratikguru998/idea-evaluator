@@ -67,3 +67,16 @@ assert.equal(ex.personas.length, 2); assert.equal(Math.round(vpcFit(ex.vpc).fit 
 const back = await decodeShare(await encodeShare(ex));
 assert.equal(back.personas[0].name, 'Freelance Fiona'); assert.equal(back.vpc.relievers.length, 3); assert.equal(back.market.accounts, '1500000');
 console.log('vpc & persona tests passed');
+
+// ---- Business Model Canvas
+const {normalizeBmc, bmcSummary, prefillFromIdea} = await import('../src/lib/bmc.js');
+const bmc = normalizeBmc({rev: [{text: 'subs', amount: '1000', type: 'bogus'}], cost: [{text: 'rent', amount: '-5', type: 'fixed'}, {text: 'ads', amount: '300', type: 'variable'}], vp: [{text: 'x', validated: 1, color: 'neon'}]});
+assert.equal(bmc.rev[0].type, 'subscription'); assert.equal(bmc.cost[0].amount, ''); assert.equal(bmc.vp[0].color, 'yellow');
+const bsum = bmcSummary(bmc);
+assert.equal(bsum.filled, 3); assert.equal(bsum.revenue, 1000); assert.equal(bsum.costs, 300); assert.equal(bsum.profit, 700); assert.equal(bsum.validated, 1);
+const exB = bmcSummary(ex.bmc);
+assert.equal(exB.filled, 9); assert.equal(exB.profit, 10260 - 8400);
+const pf = prefillFromIdea(normalize({...EXAMPLE, bmc: {}}));
+assert.ok(pf.added >= 5); assert.equal(pf.bmc.cs.length, 2);
+assert.equal(prefillFromIdea({...ex, bmc: pf.bmc}).added, 0); // idempotent
+console.log('bmc tests passed');

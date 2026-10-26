@@ -7,6 +7,8 @@ import {ThreeCDiagram} from './ThreeC.js';
 import {MarketCircles, MarketBars} from './MarketSizing.js';
 import {CanvasDiagram} from './ValueCanvas.js';
 import {PersonaCard} from './Personas.js';
+import {BmcCanvas, BmcEconomics} from './BusinessModel.js';
+import {bmcSummary} from '../../lib/bmc.js';
 import {vpcFit, adlibText} from '../../lib/vpc.js';
 import {fmt, toneFor} from '../../lib/scoring.js';
 import {forcesSummary, threeC, marketSizing, attractivenessLabel, money} from '../../lib/frameworks.js';
@@ -91,6 +93,21 @@ export default function Report({idea, r, goTo}) {
             </div>
             {fav && <p className="ie-adlib-text">“{adlibText(fav)}”</p>}
             <CanvasDiagram v={v} segment={idea.personas.find((p) => p.id === v.personaId)} />
+          </div>
+        );
+      })()}
+
+      {(() => {
+        const bs = bmcSummary(idea.bmc);
+        if (!bs.notes) return null;
+        return (
+          <div className="ie-card">
+            <div className="ie-card-head">
+              <h3>🧩 Business Model Canvas · {bs.filled}/9 blocks · {Math.round(bs.validatedPct * 100)}% validated</h3>
+              <Edit tab="bmc" />
+            </div>
+            <BmcCanvas bmc={idea.bmc} currency={cur} readOnly />
+            <BmcEconomics s={bs} currency={cur} />
           </div>
         );
       })()}
