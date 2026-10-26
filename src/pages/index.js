@@ -15,17 +15,10 @@ import ValueCanvas from '../components/evaluator/ValueCanvas.js';
 import Personas from '../components/evaluator/Personas.js';
 import BusinessModel from '../components/evaluator/BusinessModel.js';
 import {forcesSummary, threeC, marketSizing, money} from '../lib/frameworks.js';
+import {OfferMarket, OfferValue, OfferProblems, OfferDelivery, OfferStack} from '../components/evaluator/OfferSteps.js';
+import {OfferEnhance, OfferFinal} from '../components/evaluator/OfferFinish.js';
+import {PHASES, REPORT_TAB, tabById, phaseOf, neighbours, phaseProgress} from '../lib/phases.js';
 
-const TABS = [
-  {id: 'scorecard', label: '📝 Scorecard'},
-  {id: 'personas', label: '🧑 Personas', wide: true},
-  {id: 'vpc', label: '💎 Value Proposition', wide: true},
-  {id: 'bmc', label: '🧩 Business Model', wide: true},
-  {id: 'market', label: '🎯 TAM · SAM · SOM'},
-  {id: 'forces', label: '⚔️ Five Forces'},
-  {id: 'threec', label: '🔺 3C'},
-  {id: 'report', label: '📊 Report', wide: true},
-];
 const TAB_KEY = 'idea-evaluator:tab';
 
 function Evaluator() {
@@ -45,7 +38,7 @@ function Evaluator() {
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(TAB_KEY);
-      if (TABS.some((t) => t.id === saved)) setTab(saved);
+      if (tabById(saved)) setTab(saved);
     } catch {
       // storage blocked: default tab is fine
     }
@@ -57,7 +50,15 @@ function Evaluator() {
     } catch {
       // ignore
     }
-    window.scrollTo({top: document.querySelector('.ie-tabs')?.offsetTop - 70 || 0, behavior: 'smooth'});
+    window.scrollTo({top: document.querySelector('.ie-phases')?.offsetTop - 70 || 0, behavior: 'smooth'});
+  };
+
+  const progress = useMemo(() => (active ? phaseProgress(active) : null), [active]);
+  const curPhase = phaseOf(tab);
+  const {prev, next} = neighbours(tab);
+  const stepLabel = (t) => {
+    const ph = phaseOf(t.id);
+    return ph ? `${t.label} · Phase ${ph.n}` : t.label;
   };
 
   if (!state || !active) return <div className="ie-loading">Loading your ideas…</div>;
@@ -72,16 +73,51 @@ function Evaluator() {
       )}
       <IdeaManager ideas={state.ideas} active={active} r={r} actions={ideas} setNotice={setNotice} />
 
-      <nav className="ie-tabs no-print" role="tablist">
-        {TABS.map((t) => (
-          <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => goTo(t.id)}>
-            {t.label}
-          </button>
-        ))}
+      <nav className="ie-phases no-print" aria-label="Phases">
+        {PHASES.map((ph, i) => {
+          const pct = Math.round((progress[ph.id] || 0) * 100);
+          const on = curPhase?.id === ph.id;
+          return (
+            <React.Fragment key={ph.id}>
+              <button type="button" className={`ie-phase${on ? ' on' : ''}${pct >= 80 ? ' done' : ''}`} onClick={() => goTo(on ? tab : ph.tabs[0].id)} aria-current={on ? 'step' : undefined}>
+                <span className="ie-phase-n">{pct >= 80 ? '✓' : ph.n}</span>
+                <span className="ie-phase-text">
+                  <span className="ie-phase-kicker">Phase {ph.n}</span>
+                  <span className="ie-phase-title">{ph.icon} {ph.title}</span>
+                  <span className="ie-phase-blurb">{ph.blurb}</span>
+                  <span className="ie-phase-bar"><span style={{width: `${pct}%`}} /></span>
+                  <span className="ie-phase-pct">{pct}% complete</span>
+                </span>
+              </button>
+              {i < PHASES.length - 1 && <span className="ie-phase-arrow" aria-hidden="true">→</span>}
+            </React.Fragment>
+          );
+        })}
+        <button type="button" className={`ie-phase ie-phase-report${tab === 'report' ? ' on' : ''}`} onClick={() => goTo('report')}>
+          <span className="ie-phase-title">{REPORT_TAB.label}</span>
+          <span className="ie-phase-blurb">Everything on one page</span>
+        </button>
       </nav>
 
-      {TABS.find((t) => t.id === tab)?.wide ? (
+      {curPhase && (
+        <nav className="ie-tabs no-print" role="tablist" aria-label={`Phase ${curPhase.n} steps`}>
+          {curPhase.tabs.map((t, i) => (
+            <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => goTo(t.id)}>
+              <span className="ie-tab-n">{curPhase.n}.{i + 1}</span> {t.label}
+            </button>
+          ))}
+        </nav>
+      )}
+
+      {tabById(tab)?.wide ? (
         <>
+          {tab === 'o-market' && <OfferMarket idea={active} update={updateActive} />}
+          {tab === 'o-value' && <OfferValue idea={active} update={updateActive} />}
+          {tab === 'o-problems' && <OfferProblems idea={active} update={updateActive} setNotice={setNotice} />}
+          {tab === 'o-delivery' && <OfferDelivery idea={active} update={updateActive} />}
+          {tab === 'o-stack' && <OfferStack idea={active} update={updateActive} />}
+          {tab === 'o-enhance' && <OfferEnhance idea={active} update={updateActive} />}
+          {tab === 'o-final' && <OfferFinal idea={active} goTo={goTo} setNotice={setNotice} phase1={progress} />}
           {tab === 'report' && <Report idea={active} r={r} goTo={goTo} />}
           {tab === 'vpc' && <ValueCanvas idea={active} update={updateActive} />}
           {tab === 'bmc' && <BusinessModel idea={active} update={updateActive} setNotice={setNotice} />}
@@ -134,6 +170,11 @@ function Evaluator() {
           </aside>
         </div>
       )}
+
+      <nav className="ie-stepnav no-print" aria-label="Previous and next step">
+        {prev ? <button type="button" className="ie-stepnav-btn" onClick={() => goTo(prev.id)}><span className="ie-small">← Back</span>{stepLabel(prev)}</button> : <span />}
+        {next && <button type="button" className="ie-stepnav-btn next" onClick={() => goTo(next.id)}><span className="ie-small">Next →</span>{stepLabel(next)}</button>}
+      </nav>
     </>
   );
 }
@@ -143,11 +184,12 @@ export default function Home() {
     <Layout title="Evaluate a business idea" description="Score a business idea on 28 criteria and see it through customer, investor, founder and competitor lenses.">
       <header className="ie-hero no-print">
         <div className="container">
-          <h1>Is this a real problem worth solving?</h1>
+          <h1>From idea to irresistible offer</h1>
           <p>
-            Score your idea on 28 criteria, build <b>user personas</b>, a <b>Value Proposition Canvas</b> and a <b>Business Model Canvas</b>, size the market (TAM · SAM · SOM), and test it with <b>Porter's Five Forces</b> and the <b>3C model</b>.
-            See it through the eyes of a customer, an investor, a founder and a competitor, then get a verdict, red flags and what to validate next.
-            Everything stays in your browser. <Link to="/docs/how-it-works">How scoring works →</Link>
+            Work through three phases in order. <b>① Validate</b> that the problem is real and the market is worth it (scorecard, TAM · SAM · SOM, Five Forces, 3C).
+            <b> ② Design</b> who it's for and how the business works (personas, Value Proposition Canvas, Business Model Canvas).
+            <b> ③ Craft the offer</b> people can't refuse ($100M Offers method).
+            Everything stays in your browser. <Link to="/docs/how-it-works">How it works →</Link>
           </p>
         </div>
       </header>

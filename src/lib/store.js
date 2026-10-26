@@ -8,13 +8,14 @@ import {blankVpc, normalizeVpc, normalizePersona, vpcFit, lines, adlibText} from
 import {TEST_STATUS, BUYING_ROLES, TRAITS} from '../data/vpc.js';
 import {blankBmc, normalizeBmc, bmcSummary} from './bmc.js';
 import {BMC_BLOCKS} from '../data/bmc.js';
+import {blankOffer, normalizeOffer, offerStrength, offerName} from './offer.js';
 
 const KEY = 'idea-evaluator:v1';
 
 export const newId = () => Math.random().toString(36).slice(2, 10);
 
 export function blankIdea(name = 'Untitled idea') {
-  return {id: newId(), name, pitch: '', icp: '', scores: {}, evidence: {}, notes: {}, concerns: '', forces: {}, forceNotes: {}, c3: {}, market: {...BLANK_MARKET}, vpc: blankVpc(), personas: [], bmc: blankBmc(), updated: Date.now()};
+  return {id: newId(), name, pitch: '', icp: '', scores: {}, evidence: {}, notes: {}, concerns: '', forces: {}, forceNotes: {}, c3: {}, market: {...BLANK_MARKET}, vpc: blankVpc(), personas: [], bmc: blankBmc(), offer: blankOffer(), updated: Date.now()};
 }
 
 export function loadState() {
@@ -82,6 +83,7 @@ export function normalize(raw = {}) {
     market,
     vpc: normalizeVpc(raw.vpc),
     bmc: normalizeBmc(raw.bmc),
+    offer: normalizeOffer(raw.offer),
     personas: (Array.isArray(raw.personas) ? raw.personas.slice(0, 12) : []).map((p, i) => normalizePersona(p, i + 1)),
     updated: Number(raw.updated) || Date.now(),
   };
@@ -269,6 +271,26 @@ export function toMarkdown(idea, r) {
       }), '');
     }
     if (bs.hasMoney) L.push(`Monthly revenue ${money(bs.revenue, idea.market.currency)} − costs ${money(bs.costs, idea.market.currency)} = ${bs.profit < 0 ? '−' : ''}${money(Math.abs(bs.profit), idea.market.currency)}`, '');
+  }
+  const os = idea.offer ? offerStrength(idea.offer) : null;
+  if (os && (os.stack.items.length || idea.offer.dream || idea.offer.problems.length)) {
+    const o = idea.offer;
+    const cur = idea.market.currency;
+    L.push(`## Offer: ${os.name && offerName(os.name) ? offerName(os.name) : 'unnamed'} (${os.passed}/${os.total} · ${os.label})`, '');
+    if (o.dream) L.push(`**Dream outcome:** ${o.dream}`, '');
+    if (os.crowd.rated) L.push(`**Starving crowd:** ${os.crowd.total}/40 (${os.crowd.label})${o.niche ? ` · niche: ${o.niche}` : ''}`, '');
+    if (os.ve.score != null) L.push(`**Value equation:** ${os.ve.score.toFixed(1)}/10 · biggest lever: ${os.ve.weakest.title}`, '');
+    if (os.stack.items.length || o.bonuses.length) {
+      L.push('**What you get**', ...os.stack.items.map((v) => `- ${v.text}${v.worth ? ` (${money(Number(v.worth), cur)})` : ''}`),
+        ...o.bonuses.filter((b) => b.name.trim()).map((b) => `- 🎁 Bonus: ${b.name}${b.worth ? ` (${money(Number(b.worth), cur)})` : ''}`), '');
+      L.push(`Total value ${money(os.stack.total, cur)}${os.stack.price ? ` · price ${money(os.stack.price, cur)} · ${os.stack.ratio.toFixed(1)}× value` : ''}`, '');
+    }
+    const g = o.guarantee;
+    if (g.type) L.push(`**Guarantee:** ${g.name ? `${g.name}: ` : ''}${g.type === 'anti' ? 'All sales are final.' : `If ${g.condition}, we will ${g.remedy}.`}`, '');
+    if (o.scarcity.detail) L.push(`**Scarcity:** ${o.scarcity.detail}`, '');
+    if (o.urgency.detail) L.push(`**Urgency:** ${o.urgency.detail}`, '');
+    const open = os.checks.filter((c) => !c.ok);
+    if (open.length) L.push('**Still to do**', ...open.map((c) => `- [ ] ${c.label}`), '');
   }
   if (idea.concerns) L.push('## Additional concerns, assumptions, or observations', '', idea.concerns, '');
   L.push('_★ = critical criterion · scale 1 = very weak · 3 = uncertain/average · 5 = very strong_');

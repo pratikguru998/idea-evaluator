@@ -80,3 +80,21 @@ const pf = prefillFromIdea(normalize({...EXAMPLE, bmc: {}}));
 assert.ok(pf.added >= 5); assert.equal(pf.bmc.cs.length, 2);
 assert.equal(prefillFromIdea({...ex, bmc: pf.bmc}).added, 0); // idempotent
 console.log('bmc tests passed');
+
+// ---- Offer builder & phases
+const {normalizeOffer, crowdScore, valueEquation, stackSummary, offerStrength, quadrant, howTo, prefillProblems} = await import('../src/lib/offer.js');
+const {phaseProgress, neighbours, phaseOf} = await import('../src/lib/phases.js');
+const of = normalizeOffer({crowd: {pain: 11, power: 7}, ve: {outcome: 10, likelihood: 10, time: 1, effort: 1}, vehicles: [{text: 'x', problemId: 'ghost', value: 2, cost: 5, include: true, worth: '100'}], price: '-3'});
+assert.deepEqual(of.crowd, {power: 7}); assert.equal(of.vehicles[0].problemId, ''); assert.equal(of.price, '');
+assert.equal(valueEquation(of).score, 10); assert.equal(valueEquation(normalizeOffer({ve: {outcome: 5, likelihood: 5, time: 5, effort: 5}})).score, 5);
+assert.equal(quadrant(of.vehicles[0]), 'cut'); assert.equal(stackSummary(of).cuts.length, 1);
+assert.equal(crowdScore(normalizeOffer({crowd: {pain: 8, power: 8, target: 8, growing: 8}})).tone, 'good');
+assert.match(howTo({text: 'Too slow.', driver: 'time'}), /^How to beat “too slow” fast/);
+const exO = offerStrength(ex.offer);
+assert.equal(exO.stack.total, 1070 + 1117); assert.ok(exO.stack.bonusValue >= exO.stack.coreValue);
+assert.equal(exO.passed, exO.total, `example offer fails: ${exO.checks.filter((c) => !c.ok).map((c) => c.id)}`);
+assert.equal(prefillProblems(ex).length > 0, true);
+const pp = phaseProgress(ex);
+assert.ok(pp.validate > 0.8 && pp.design > 0.6 && pp.offer === 1, JSON.stringify(pp));
+assert.equal(neighbours('threec').next.id, 'personas'); assert.equal(neighbours('o-final').next.id, 'report'); assert.equal(phaseOf('o-stack').n, 3);
+console.log('offer & phase tests passed');

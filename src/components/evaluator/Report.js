@@ -9,6 +9,8 @@ import {CanvasDiagram} from './ValueCanvas.js';
 import {PersonaCard} from './Personas.js';
 import {BmcCanvas, BmcEconomics} from './BusinessModel.js';
 import {bmcSummary} from '../../lib/bmc.js';
+import {OfferOnePager} from './OfferFinish.js';
+import {offerStrength} from '../../lib/offer.js';
 import {vpcFit, adlibText} from '../../lib/vpc.js';
 import {fmt, toneFor} from '../../lib/scoring.js';
 import {forcesSummary, threeC, marketSizing, attractivenessLabel, money} from '../../lib/frameworks.js';
@@ -130,6 +132,17 @@ export default function Report({idea, r, goTo}) {
           <MarketBars ms={ms} currency={cur} />
         </div>
       </div>
+
+      {(() => {
+        const os = offerStrength(idea.offer);
+        if (!os.stack.items.length && !idea.offer.dream) return null;
+        return (
+          <div className="ie-card">
+            <div className="ie-card-head"><h3>🏆 Offer · {os.passed}/{os.total} · {os.label}</h3><Edit tab="o-final" /></div>
+            <OfferOnePager idea={idea} />
+          </div>
+        );
+      })()}
 
       <div className="ie-grid-2">
         <RedFlags r={r} scores={idea.scores} onJump={(sec) => {

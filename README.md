@@ -1,6 +1,6 @@
 # Idea Evaluator
 
-An interactive, private scorecard for answering *"Is this a real problem worth solving?"*
+An interactive, private workspace that takes a business idea through three phases: **① validate the idea → ② design value & business model → ③ craft an irresistible offer**.
 
 **Live:** https://pratikguru998.github.io/idea-evaluator/
 
@@ -8,6 +8,7 @@ An interactive, private scorecard for answering *"Is this a real problem worth s
 - Build **user personas** (profile cards with goals, frustrations, behaviour sliders, buying role).
 - Design a **Value Proposition Canvas** with fit scoring, an interactive fit matrix, ad-lib statements, a great-VP checklist and test cards.
 - Map the whole business on a **Business Model Canvas**: sticky notes, assumption vs validated, monthly economics, and pre-fill from other tabs.
+- Build a **Grand Slam Offer** ($100M Offers method): starving crowd, value equation, problems → solutions, delivery vehicles, trim & stack, scarcity, urgency, bonuses, guarantee and MAGIC naming.
 - Size the market with a **TAM / SAM / SOM** calculator and chart (bottom-up or top-down, with a revenue-goal check).
 - Analyse the industry with **Porter's Five Forces** and the strategy with the **3C model** (Customers · Company · Competitors).
 - See it through **4 perspective lenses**: Customer, Investor, Founder/Operator, Competitor.

@@ -10,6 +10,16 @@ import LensTable from '@site/src/components/evaluator/LensTable';
 The evaluator answers one question: **is this a real problem worth solving, and am I the right person to solve it?**
 You score 28 criteria once. The site then views those scores from several angles.
 
+The tool is organised as a three-phase journey. Work through it in order. Each phase shows a progress bar, and the **Next →** button at the bottom of every step takes you to the following one.
+
+| Phase | Question | Steps |
+|---|---|---|
+| **① Validate the idea** | Is this a real problem, in a market worth entering? | Scorecard · TAM/SAM/SOM · Five Forces · 3C |
+| **② Design value & business model** | Who is it for, what value do you create, how does the business work? | Personas · Value Proposition Canvas · Business Model Canvas |
+| **③ Craft the offer** | How do you package it so people feel stupid saying no? | Starving crowd · Value equation · Problems → solutions · Delivery · Trim & stack · Enhance · Your offer |
+
+Don't polish an offer (phase 3) for an idea that failed validation (phase 1). The offer page warns you when the phase 1 verdict is weak.
+
 ## 1. Score from evidence, not optimism
 
 Each criterion is scored **1 to 5**, and **5 is always the favourable end**. For "operational complexity", 5 means *simple to run*. For "customer acquisition cost", 5 means *cheap to acquire*.
@@ -217,11 +227,53 @@ The nine building blocks from *Business Model Generation* (Osterwalder & Pigneur
 - a model that is mostly untested assumptions
 - costs higher than revenue
 
-## 12. Report tab
+## 12. Offer builder (phase 3)
 
-The **Report** tab shows every result full-width with large charts: both radars, persona cards, the Value Proposition Canvas, the Business Model Canvas, the Five Forces diagram, the 3C diagram, the market chart, red flags and next tests. Use **Print / PDF** from that tab for a one-document summary.
+Based on the method in Alex Hormozi's *$100M Offers* (2021). Everything is paraphrased.
 
-## 13. Privacy, saving and sharing
+1. **Starving crowd.** Rate the market 1–10 on four indicators (/40):
+   - massive pain
+   - purchasing power
+   - easy to target
+   - growing
+
+   Pick a core market (health, wealth or relationships) and niche down. Enter your price against competitors' prices. The point is to charge what it's worth, not to compete on price.
+2. **Value equation.** *Value = (dream outcome × perceived likelihood) ÷ (time delay × effort & sacrifice).*
+   - Rate each driver 1–10. The score is shown on a 0–10 log scale.
+   - The tool names your biggest lever and gives a tip for improving it.
+3. **Problems → solutions.**
+   - List every obstacle before, during and after the purchase. Import them from your canvas pains and persona frustrations.
+   - Tag each with the doubt it represents: not worth it, won't work for me, takes too long, too hard.
+   - Flip each into a "How to…" solution. ✨ suggests a first draft.
+4. **Delivery vehicles.**
+   - For each solution, brainstorm ways to deliver it, varying three things:
+     - personal attention: 1-on-1, small group, one-to-many
+     - customer effort: DIY, done with you, done for you
+     - medium
+   - Cheat codes include the 10× and 1/10th price tests.
+5. **Trim & stack.**
+   - Rate every delivery idea on value to the customer and cost to you. A matrix sorts them into *keep / keep if profitable / optional / cut*.
+   - Give the kept items a perceived worth and stack them. The tool shows total value against price, aiming for at least 10×.
+6. **Enhance.**
+   - **Scarcity:** limited seats, limited bonuses, or a never-again offer.
+   - **Urgency:** rolling cohorts, seasonal promotions, price or bonus deadlines, or an exploding opportunity.
+   - **Bonuses:** each one should kill a specific doubt. Tools beat training. Bonus value should exceed the core.
+   - **Guarantee:** unconditional, conditional, anti-guarantee or implied, written as "if X, we will Y", with a vivid name.
+   - **MAGIC name:** Magnetic reason why · Avatar · Goal · Interval · Container word.
+7. **Your offer.** A one-page offer and a 12-point strength checklist. Each open item has a "fix →" link to the right step. Copy the offer as plain text for a sales page or DM.
+
+| Checks passed | Label |
+|---|---|
+| 11–12 | Grand Slam Offer 🏆 |
+| 8–10 | Strong offer |
+| 5–7 | Decent offer |
+| 0–4 | Commodity offer |
+
+## 13. Report tab
+
+The **Report** tab shows every result full-width with large charts: both radars, persona cards, the Value Proposition Canvas, the Business Model Canvas, the offer one-pager, the Five Forces diagram, the 3C diagram, the market chart, red flags and next tests. Use **Print / PDF** from that tab for a one-document summary.
+
+## 14. Privacy, saving and sharing
 
 - Everything is stored **only in your browser** (localStorage). There is no server, account or tracking.
 - **Share link**: the whole idea is packed into the link itself (after the `#`). Whoever opens it gets their own copy.
