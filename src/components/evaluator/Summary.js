@@ -13,7 +13,49 @@ function Meter({label, value, hint}) {
   );
 }
 
-export default function Summary({r, scores}) {
+export function RedFlags({r, scores, onJump}) {
+  return (
+    <div className="ie-card">
+      <h3>🚩 Red flags</h3>
+      {r.redFlags.length ? (
+        <ul className="ie-list">
+          {r.redFlags.map((c) => (
+            <li key={c.id}>
+              <a href={`#section-${c.section}`} onClick={onJump ? (e) => { e.preventDefault(); onJump(c.section); } : undefined}><b>{c.label}</b></a> scored <b>{scores[c.id]}</b>
+              {c.critical && <span className="ie-crit">critical</span>}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ie-small">No criterion scored 1–2 yet.</p>
+      )}
+    </div>
+  );
+}
+
+export function ValidateNext({r}) {
+  return (
+    <div className="ie-card">
+      <h3>🧪 Validate next</h3>
+      {r.validateNext.length ? (
+        <ol className="ie-list ie-next">
+          {r.validateNext.map((c) => (
+            <li key={c.id}>
+              <div><b>{c.label}</b> <span className={`ie-reason r-${c.reason.split(' ')[0].toLowerCase()}`}>{c.reason}</span></div>
+              <div className="ie-small">{c.test}</div>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="ie-small">Everything is scored and evidence-backed. Go build.</p>
+      )}
+    </div>
+  );
+}
+
+export {Meter};
+
+export default function Summary({r, scores, extras, onOpenReport}) {
   const [view, setView] = useState('sections');
   const axes = view === 'sections'
     ? r.sections.map((s) => ({label: s.title, short: `${s.id} · ${s.title.split(' ')[0]}`}))
@@ -39,6 +81,14 @@ export default function Summary({r, scores}) {
         <Meter label={`Coverage · ${r.scoredCount}/${r.total}`} value={r.coverage} hint="Share of criteria you have scored" />
         <Meter label="Evidence-backed" value={r.confidence} hint="Share of your scores ticked as backed by evidence" />
         {r.warnings.map((w) => <div key={w} className="ie-warn">⚠️ {w}</div>)}
+        {extras && (
+          <div className="ie-extras">
+            <div><span className="ie-small">⚔️ Industry (5 forces)</span><b className={`t-${toneFor(extras.attractiveness)}`}>{fmt(extras.attractiveness)}</b></div>
+            <div><span className="ie-small">🎯 SOM</span><b>{extras.som}</b></div>
+            <div><span className="ie-small">🔺 Weakest C</span><b>{extras.weakestC}</b></div>
+          </div>
+        )}
+        {onOpenReport && <button type="button" className="ie-btn ie-btn-primary ie-block no-print" onClick={onOpenReport}>📊 Open full report with large charts</button>}
       </div>
 
       <div className="ie-card">
@@ -58,37 +108,8 @@ export default function Summary({r, scores}) {
         <LensPanel lenses={r.lenses} />
       </div>
 
-      <div className="ie-card">
-        <h3>🚩 Red flags</h3>
-        {r.redFlags.length ? (
-          <ul className="ie-list">
-            {r.redFlags.map((c) => (
-              <li key={c.id}>
-                <a href={`#section-${c.section}`}><b>{c.label}</b></a> scored <b>{scores[c.id]}</b>
-                {c.critical && <span className="ie-crit">critical</span>}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="ie-small">No criterion scored 1–2 yet.</p>
-        )}
-      </div>
-
-      <div className="ie-card">
-        <h3>🧪 Validate next</h3>
-        {r.validateNext.length ? (
-          <ol className="ie-list ie-next">
-            {r.validateNext.map((c) => (
-              <li key={c.id}>
-                <div><b>{c.label}</b> <span className={`ie-reason r-${c.reason.split(' ')[0].toLowerCase()}`}>{c.reason}</span></div>
-                <div className="ie-small">{c.test}</div>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="ie-small">Everything is scored and evidence-backed. Go build.</p>
-        )}
-      </div>
+      <RedFlags r={r} scores={scores} />
+      <ValidateNext r={r} />
     </div>
   );
 }

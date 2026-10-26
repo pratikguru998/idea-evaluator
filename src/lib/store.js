@@ -2,13 +2,15 @@
 // wrapped in try/catch: private windows or blocked storage must not break the page.
 import {CRITERIA, SECTIONS} from '../data/criteria.js';
 import {fmt} from './scoring.js';
+import {BLANK_MARKET, FORCES, THREE_C, CURRENCIES} from '../data/frameworks.js';
+import {forcesSummary, threeC, marketSizing, money, count, attractivenessLabel} from './frameworks.js';
 
 const KEY = 'idea-evaluator:v1';
 
 export const newId = () => Math.random().toString(36).slice(2, 10);
 
 export function blankIdea(name = 'Untitled idea') {
-  return {id: newId(), name, pitch: '', icp: '', scores: {}, evidence: {}, notes: {}, concerns: '', updated: Date.now()};
+  return {id: newId(), name, pitch: '', icp: '', scores: {}, evidence: {}, notes: {}, concerns: '', forces: {}, forceNotes: {}, c3: {}, market: {...BLANK_MARKET}, updated: Date.now()};
 }
 
 export function loadState() {
@@ -45,6 +47,22 @@ export function normalize(raw = {}) {
     if (typeof raw.notes?.[c.id] === 'string' && raw.notes[c.id]) notes[c.id] = raw.notes[c.id].slice(0, 2000);
   }
   const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
+  const forces = {};
+  const forceNotes = {};
+  for (const f of FORCES) {
+    const v = Number(raw.forces?.[f.id]);
+    if (Number.isInteger(v) && v >= 1 && v <= 5) forces[f.id] = v;
+    if (str(raw.forceNotes?.[f.id], 2000)) forceNotes[f.id] = str(raw.forceNotes[f.id], 2000);
+  }
+  const c3 = {};
+  for (const c of THREE_C) if (str(raw.c3?.[c.id], 5000)) c3[c.id] = str(raw.c3[c.id], 5000);
+  const market = {...BLANK_MARKET};
+  for (const k of Object.keys(BLANK_MARKET)) {
+    const v = raw.market?.[k];
+    if (typeof v === 'string' || typeof v === 'number') market[k] = String(v).slice(0, k === 'source' ? 3000 : 40);
+  }
+  if (!['bottomup', 'topdown'].includes(market.mode)) market.mode = 'bottomup';
+  if (!CURRENCIES.some((c) => c.code === market.currency)) market.currency = 'USD';
   return {
     id: typeof raw.id === 'string' && raw.id ? raw.id : base.id,
     name: str(raw.name, 120) || base.name,
@@ -54,6 +72,10 @@ export function normalize(raw = {}) {
     scores,
     evidence,
     notes,
+    forces,
+    forceNotes,
+    c3,
+    market,
     updated: Number(raw.updated) || Date.now(),
   };
 }
@@ -71,6 +93,10 @@ export function encodeShare(idea) {
     e: CRITERIA.map((c) => (idea.evidence[c.id] ? 1 : 0)).join(''),
     o: Object.keys(idea.notes).length ? idea.notes : undefined,
     c: idea.concerns || undefined,
+    f: FORCES.map((f) => idea.forces?.[f.id] || 0).join(''),
+    fn: Object.keys(idea.forceNotes || {}).length ? idea.forceNotes : undefined,
+    k: Object.keys(idea.c3 || {}).length ? idea.c3 : undefined,
+    m: Object.fromEntries(Object.entries(idea.market || {}).filter(([k, v]) => v !== '' && v !== BLANK_MARKET[k])),
   };
   return b64encode(JSON.stringify(packed));
 }
@@ -85,7 +111,13 @@ export function decodeShare(str) {
       if (v >= 1 && v <= 5) scores[c.id] = v;
       if (p.e?.[i] === '1') evidence[c.id] = true;
     });
-    return normalize({name: p.n, pitch: p.p, icp: p.i, concerns: p.c, notes: p.o, scores, evidence, id: newId()});
+    const forces = {};
+    FORCES.forEach((f, i) => {
+      const v = Number(p.f?.[i]);
+      if (v >= 1 && v <= 5) forces[f.id] = v;
+    });
+    return normalize({name: p.n, pitch: p.p, icp: p.i, concerns: p.c, notes: p.o, scores, evidence, forces,
+      forceNotes: p.fn, c3: p.k, market: {...BLANK_MARKET, ...(p.m || {})}, id: newId()});
   } catch {
     return null;
   }
@@ -123,6 +155,30 @@ export function toMarkdown(idea, r) {
     r.validateNext.forEach((c) => L.push(`- **${c.label}** (${c.reason}): ${c.test}`));
     L.push('');
   }
+  const ms = marketSizing(idea.market);
+  if (ms.tam != null || ms.sam != null || ms.som != null) {
+    const cur = idea.market.currency;
+    L.push('## Market size (TAM / SAM / SOM)', '', '| Layer | Annual value | Customers |', '|---|---|---|');
+    L.push(`| TAM | ${money(ms.tam, cur)} | ${count(ms.accounts.tam)} |`);
+    L.push(`| SAM | ${money(ms.sam, cur)} | ${count(ms.accounts.sam)} |`);
+    L.push(`| SOM | ${money(ms.som, cur)} | ${count(ms.accounts.som)} |`);
+    if (ms.goal) L.push(`| Revenue goal | ${money(ms.goal, cur)} | ${count(ms.goalCheck?.customersNeeded)} |`);
+    L.push('');
+    if (idea.market.source) L.push(`_Sources / assumptions:_ ${idea.market.source}`, '');
+  }
+  const fs = forcesSummary(idea.forces, idea.scores);
+  if (fs.rated) {
+    L.push(`## Porter's Five Forces: industry attractiveness ${fmt(fs.attractiveness)} / 5 (${attractivenessLabel(fs.attractiveness)})`, '',
+      '| Force | Intensity (1 weak – 5 strong) | Note |', '|---|---|---|');
+    fs.items.forEach((f) => L.push(`| ${f.title} | ${f.intensity || '–'} | ${(idea.forceNotes?.[f.id] || '').replace(/\|/g, '\\|').replace(/\n/g, ' ')} |`));
+    L.push('');
+  }
+  const cs = threeC(idea.scores);
+  L.push('## 3C analysis', '');
+  cs.forEach((c) => {
+    L.push(`### ${c.title}: ${fmt(c.score)}`, '');
+    if (idea.c3?.[c.id]) L.push(idea.c3[c.id], '');
+  });
   if (idea.concerns) L.push('## Additional concerns, assumptions, or observations', '', idea.concerns, '');
   L.push('_★ = critical criterion · scale 1 = very weak · 3 = uncertain/average · 5 = very strong_');
   return L.join('\n');

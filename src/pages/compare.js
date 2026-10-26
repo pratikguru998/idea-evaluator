@@ -5,6 +5,7 @@ import {evaluate, fmt, toneFor} from '../lib/scoring.js';
 import useIdeas from '../lib/useIdeas.js';
 import {saveState} from '../lib/store.js';
 import RadarChart from '../components/evaluator/RadarChart.js';
+import {forcesSummary, threeC, marketSizing, money} from '../lib/frameworks.js';
 
 const COLORS = ['#4f46e5', '#e11d48', '#059669', '#d97706'];
 
@@ -23,7 +24,7 @@ function Compare() {
   const rows = useMemo(() => {
     if (!state) return [];
     return picked.map((id) => state.ideas.find((i) => i.id === id)).filter(Boolean)
-      .map((idea) => ({idea, r: evaluate(idea.scores, idea.evidence)}));
+      .map((idea) => ({idea, r: evaluate(idea.scores, idea.evidence), fs: forcesSummary(idea.forces, idea.scores), cs: threeC(idea.scores), ms: marketSizing(idea.market)}));
   }, [state, picked]);
 
   if (!state) return <div className="ie-loading">Loading your ideas…</div>;
@@ -94,6 +95,14 @@ function Compare() {
               {first.lenses.map((l, i) => (
                 <tr key={l.id}><th>{l.icon} {l.title}</th>{rows.map(({idea, r}) => <Cell key={idea.id} v={r.lenses[i].score} />)}</tr>
               ))}
+              <tr className="ie-table-sep"><th colSpan={rows.length + 1}>Strategy frameworks</th></tr>
+              <tr><th>⚔️ Industry attractiveness</th>{rows.map(({idea, fs}) => <Cell key={idea.id} v={fs.attractiveness} />)}</tr>
+              {first && rows[0].cs.map((c, i) => (
+                <tr key={c.id}><th>{c.icon} 3C · {c.title}</th>{rows.map(({idea, cs}) => <Cell key={idea.id} v={cs[i].score} />)}</tr>
+              ))}
+              <tr><th>🎯 TAM</th>{rows.map(({idea, ms}) => <td key={idea.id}>{money(ms.tam, idea.market.currency)}</td>)}</tr>
+              <tr><th>🎯 SAM</th>{rows.map(({idea, ms}) => <td key={idea.id}>{money(ms.sam, idea.market.currency)}</td>)}</tr>
+              <tr><th>🎯 SOM</th>{rows.map(({idea, ms}) => <td key={idea.id}>{money(ms.som, idea.market.currency)}{ms.goalCheck ? ` (${ms.goalCheck.ratio.toFixed(1)}× goal)` : ''}</td>)}</tr>
               <tr className="ie-table-sep"><th colSpan={rows.length + 1}>Risks</th></tr>
               <tr><th>Red flags</th>{rows.map(({idea, r}) => <td key={idea.id} className="ie-small">{r.redFlags.map((c) => c.label).join(', ') || '–'}</td>)}</tr>
               <tr><th>Knockouts</th>{rows.map(({idea, r}) => <td key={idea.id} className="ie-small">{r.knockouts.map((c) => c.label).join(', ') || '–'}</td>)}</tr>

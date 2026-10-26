@@ -80,7 +80,61 @@ The verdict is marked **provisional** when fewer than 60% of criteria are scored
 
 Each comes with a concrete test, such as pre-selling for willingness to pay or a two-week spike for technical feasibility.
 
-## 6. Privacy, saving and sharing
+## 6. Market size: TAM · SAM · SOM
+
+| Layer | Meaning |
+|---|---|
+| **TAM**: total addressable market | Everyone who could ever buy this. |
+| **SAM**: serviceable available market | The part your product, geography and channels can actually serve. |
+| **SOM**: serviceable obtainable market | What you can realistically win in 3–5 years. |
+
+- **Bottom-up** (recommended): TAM = number of potential customers × annual revenue per customer. SAM is a % of TAM, and SOM is a % of SAM.
+- **Top-down**: type in the three values from reports. Add a price if you want them converted into customer counts.
+- Set a **revenue goal** and the tool checks it against your SOM:
+
+| SOM ÷ goal | Suggested *Market size* score |
+|---|---|
+| ≥ 3× | 5 |
+| ≥ 1.5× | 4 |
+| ≥ 1× | 3 |
+| ≥ 0.5× | 2 |
+| below 0.5× | 1 |
+
+  One click applies the suggestion to the scorecard.
+
+The chart draws nested circles whose **areas** are proportional to the values. A log-scale bar chart sits beside it so a tiny SOM stays readable.
+
+## 7. Porter's Five Forces
+
+Michael Porter's model asks how attractive the **industry** is, separately from your product. Rate each force by **intensity**: 1 = weak (good for you), 5 = strong (squeezes profits).
+
+| Force | Strong when… |
+|---|---|
+| ⚔️ Competitive rivalry | many similar players, slow growth, little differentiation |
+| 🚪 Threat of new entrants | it is cheap to start and there are no network effects, brand or regulation barriers |
+| 🧑‍💼 Buyer power | customers are few, price-sensitive, or can switch or build it themselves |
+| 🏭 Supplier power | you depend on one platform, API or marketplace |
+| 🔄 Threat of substitutes | manual work, spreadsheets or "do nothing" are good enough |
+
+- **Industry attractiveness** = average of (6 − intensity), on the same 1–5 scale as everything else.
+- The scorecard **suggests** an intensity for each force from related criteria. For example, rivalry is suggested from *competitive alternatives* and *differentiation*. One click fills any unrated forces.
+
+## 8. 3C model
+
+Kenichi Ohmae's 3C model says a strategy lives where three things overlap: **Customers** (what they need), **Company** (what you do well) and **Competitors** (where they fall short).
+
+Each C gets a score from the related scorecard criteria, plus your own written analysis:
+- **Customers:** severity, frequency, urgency, ICP, market size, access, willingness to pay.
+- **Company:** founder-market fit, feasibility, distribution, validation speed, operations, margin, cash.
+- **Competitors:** alternatives, differentiation, defensibility, switching costs. A high score here means your competitive position is strong.
+
+The overlap is only as strong as the weakest circle.
+
+## 9. Report tab
+
+The **Report** tab shows every result full-width with large charts: both radars, the Five Forces diagram, the 3C diagram, the market chart, red flags and next tests. Use **Print / PDF** from that tab for a one-document summary.
+
+## 10. Privacy, saving and sharing
 
 - Everything is stored **only in your browser** (localStorage). There is no server, account or tracking.
 - **Share link**: the whole idea is packed into the link itself (after the `#`). Whoever opens it gets their own copy.

@@ -3,8 +3,8 @@ import React from 'react';
 // Dependency-free SVG radar. `series` values are on a 1–5 scale; null plots at the centre.
 export default function RadarChart({axes, series, size = 300}) {
   // Wide side padding so long axis labels are never clipped.
-  const padX = 100;
-  const padY = 48;
+  const padX = 130;
+  const padY = 52;
   const w = size + padX * 2;
   const h = size + padY * 2;
   const cx = w / 2;
