@@ -45,3 +45,25 @@ m = marketSizing({mode: 'topdown', tam: '100', sam: '200', som: '10'});
 assert.ok(m.warnings.length === 1 && /SAM is larger/.test(m.warnings[0]));
 assert.equal(money(1.5e9, 'USD'), '$1.5B'); assert.equal(money(2.5e7, 'INR'), '₹2.5Cr');
 console.log('framework tests passed');
+
+// ---- Value Proposition Canvas & personas
+const {normalizeVpc, normalizePersona, vpcFit, adlibText} = await import('../src/lib/vpc.js');
+const {EXAMPLE} = await import('../src/data/example.js');
+const {normalize, encodeShare, decodeShare} = await import('../src/lib/store.js');
+let v = normalizeVpc({
+  pains: [{id: 'p1', text: 'a', weight: 5}, {id: 'p2', text: 'b', weight: 1}],
+  gains: [{id: 'g1', text: 'c', weight: 4}],
+  relievers: [{id: 'r1', text: 'x', targets: ['p1', 'ghost']}, {id: 'r2', text: 'orphan', targets: []}],
+});
+assert.deepEqual(v.relievers[0].targets, ['p1']); // dangling link removed
+let vf = vpcFit(v);
+assert.equal(vf.pains.fit, 5 / 6); assert.equal(vf.gains.fit, 0); assert.equal(vf.fit, 5 / 10);
+assert.equal(vf.orphans.length, 1); assert.equal(vf.suggestedScore, 3);
+assert.match(adlibText({product: 'P', segment: 'S', job: 'J', verb1: 'cutting', pain: 'X', verb2: 'boosting', gain: 'Y', competitor: 'Z'}), /^Our P help S who want to J by cutting X and boosting Y, unlike Z\.$/);
+const per = normalizePersona({name: 'N', traits: {price: 9, tech: 4}, roles: ['buyer', 'nope'], avatar: 'evil'});
+assert.deepEqual(per.traits, {tech: 4}); assert.deepEqual(per.roles, ['buyer']); assert.notEqual(per.avatar, 'evil');
+const ex = normalize(EXAMPLE);
+assert.equal(ex.personas.length, 2); assert.equal(Math.round(vpcFit(ex.vpc).fit * 100), 83);
+const back = await decodeShare(await encodeShare(ex));
+assert.equal(back.personas[0].name, 'Freelance Fiona'); assert.equal(back.vpc.relievers.length, 3); assert.equal(back.market.accounts, '1500000');
+console.log('vpc & persona tests passed');

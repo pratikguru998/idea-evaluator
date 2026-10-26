@@ -13,22 +13,21 @@ export default function useIdeas({acceptShare = false} = {}) {
       const first = blankIdea('My business idea');
       s = {ideas: [first], activeId: first.id};
     }
-    if (acceptShare) {
-      const m = window.location.hash.match(/^#share=(.+)$/);
-      if (m) {
-        const shared = decodeShare(m[1]);
-        if (shared) {
-          shared.name = `${shared.name} (shared)`;
-          s = {ideas: [...s.ideas, shared], activeId: shared.id};
-          setNotice(`Imported shared idea “${shared.name}”. It is now saved in this browser.`);
-        } else {
-          setNotice('That share link could not be read.');
-        }
-        window.history.replaceState(null, '', window.location.pathname + window.location.search);
-      }
-    }
     if (!s.ideas.some((i) => i.id === s.activeId)) s.activeId = s.ideas[0].id;
     setState(s);
+    const m = acceptShare && window.location.hash.match(/^#share=(.+)$/);
+    if (m) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      decodeShare(m[1]).then((shared) => {
+        if (!shared) {
+          setNotice('That share link could not be read.');
+          return;
+        }
+        shared.name = `${shared.name} (shared)`;
+        setState((cur) => ({ideas: [...cur.ideas, shared], activeId: shared.id}));
+        setNotice(`Imported shared idea “${shared.name}”. It is now saved in this browser.`);
+      });
+    }
   }, [acceptShare]);
 
   useEffect(() => {

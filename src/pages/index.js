@@ -11,14 +11,18 @@ import MarketSizing from '../components/evaluator/MarketSizing.js';
 import FiveForces from '../components/evaluator/FiveForces.js';
 import ThreeC from '../components/evaluator/ThreeC.js';
 import Report from '../components/evaluator/Report.js';
+import ValueCanvas from '../components/evaluator/ValueCanvas.js';
+import Personas from '../components/evaluator/Personas.js';
 import {forcesSummary, threeC, marketSizing, money} from '../lib/frameworks.js';
 
 const TABS = [
   {id: 'scorecard', label: '📝 Scorecard'},
+  {id: 'personas', label: '🧑 Personas', wide: true},
+  {id: 'vpc', label: '💎 Value Proposition', wide: true},
   {id: 'market', label: '🎯 TAM · SAM · SOM'},
   {id: 'forces', label: '⚔️ Five Forces'},
   {id: 'threec', label: '🔺 3C'},
-  {id: 'report', label: '📊 Report'},
+  {id: 'report', label: '📊 Report', wide: true},
 ];
 const TAB_KEY = 'idea-evaluator:tab';
 
@@ -74,8 +78,12 @@ function Evaluator() {
         ))}
       </nav>
 
-      {tab === 'report' ? (
-        <Report idea={active} r={r} goTo={goTo} />
+      {TABS.find((t) => t.id === tab)?.wide ? (
+        <>
+          {tab === 'report' && <Report idea={active} r={r} goTo={goTo} />}
+          {tab === 'vpc' && <ValueCanvas idea={active} update={updateActive} />}
+          {tab === 'personas' && <Personas key={active.id} idea={active} update={updateActive} goTo={goTo} setNotice={setNotice} />}
+        </>
       ) : (
         <div className="ie-layout">
           <div className="ie-main">
@@ -134,7 +142,7 @@ export default function Home() {
         <div className="container">
           <h1>Is this a real problem worth solving?</h1>
           <p>
-            Score your idea on 28 criteria, size the market (TAM · SAM · SOM), and test it with <b>Porter's Five Forces</b> and the <b>3C model</b>.
+            Score your idea on 28 criteria, build <b>user personas</b> and a <b>Value Proposition Canvas</b>, size the market (TAM · SAM · SOM), and test it with <b>Porter's Five Forces</b> and the <b>3C model</b>.
             See it through the eyes of a customer, an investor, a founder and a competitor, then get a verdict, red flags and what to validate next.
             Everything stays in your browser. <Link to="/docs/how-it-works">How scoring works →</Link>
           </p>

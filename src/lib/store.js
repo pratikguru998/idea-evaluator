@@ -4,13 +4,15 @@ import {CRITERIA, SECTIONS} from '../data/criteria.js';
 import {fmt} from './scoring.js';
 import {BLANK_MARKET, FORCES, THREE_C, CURRENCIES} from '../data/frameworks.js';
 import {forcesSummary, threeC, marketSizing, money, count, attractivenessLabel} from './frameworks.js';
+import {blankVpc, normalizeVpc, normalizePersona, vpcFit, lines, adlibText} from './vpc.js';
+import {TEST_STATUS, BUYING_ROLES, TRAITS} from '../data/vpc.js';
 
 const KEY = 'idea-evaluator:v1';
 
 export const newId = () => Math.random().toString(36).slice(2, 10);
 
 export function blankIdea(name = 'Untitled idea') {
-  return {id: newId(), name, pitch: '', icp: '', scores: {}, evidence: {}, notes: {}, concerns: '', forces: {}, forceNotes: {}, c3: {}, market: {...BLANK_MARKET}, updated: Date.now()};
+  return {id: newId(), name, pitch: '', icp: '', scores: {}, evidence: {}, notes: {}, concerns: '', forces: {}, forceNotes: {}, c3: {}, market: {...BLANK_MARKET}, vpc: blankVpc(), personas: [], updated: Date.now()};
 }
 
 export function loadState() {
@@ -76,6 +78,8 @@ export function normalize(raw = {}) {
     forceNotes,
     c3,
     market,
+    vpc: normalizeVpc(raw.vpc),
+    personas: (Array.isArray(raw.personas) ? raw.personas.slice(0, 12) : []).map((p, i) => normalizePersona(p, i + 1)),
     updated: Number(raw.updated) || Date.now(),
   };
 }
@@ -84,7 +88,35 @@ export function normalize(raw = {}) {
 const b64encode = (s) => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const b64decode = (s) => decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/'))));
 
-export function encodeShare(idea) {
+const bytesToB64 = (bytes) => {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+const b64ToBytes = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+const pipe = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
+
+// v2 links: the whole idea as deflated JSON, prefixed "z". Falls back to the compact v1 format.
+export async function encodeShare(idea) {
+  if (typeof CompressionStream === 'undefined') return encodeShareV1(idea);
+  const {id, updated, ...rest} = idea;
+  const packed = await pipe(new TextEncoder().encode(JSON.stringify(rest)), new CompressionStream('deflate-raw'));
+  return `z${bytesToB64(packed)}`;
+}
+
+export async function decodeShare(str) {
+  if (str.startsWith('z')) {
+    try {
+      const json = new TextDecoder().decode(await pipe(b64ToBytes(str.slice(1)), new DecompressionStream('deflate-raw')));
+      return normalize({...JSON.parse(json), id: newId()});
+    } catch {
+      return null;
+    }
+  }
+  return decodeShareV1(str);
+}
+
+function encodeShareV1(idea) {
   const packed = {
     n: idea.name,
     p: idea.pitch || undefined,
@@ -101,7 +133,7 @@ export function encodeShare(idea) {
   return b64encode(JSON.stringify(packed));
 }
 
-export function decodeShare(str) {
+function decodeShareV1(str) {
   try {
     const p = JSON.parse(b64decode(str));
     const scores = {};
@@ -179,6 +211,49 @@ export function toMarkdown(idea, r) {
     L.push(`### ${c.title}: ${fmt(c.score)}`, '');
     if (idea.c3?.[c.id]) L.push(idea.c3[c.id], '');
   });
+  if (idea.personas?.length) {
+    L.push('## Personas', '');
+    for (const p of idea.personas) {
+      L.push(`### ${p.avatar} ${p.name}${p.primary ? ' (primary)' : ''}`, '');
+      const facts = [p.role, p.age && `age ${p.age}`, p.location, p.budget && `budget ${p.budget}`].filter(Boolean).join(' · ');
+      if (facts) L.push(facts, '');
+      if (p.quote) L.push(`> “${p.quote}”`, '');
+      if (p.bio) L.push(p.bio, '');
+      if (p.roles.length) L.push(`**Buying role:** ${p.roles.map((id) => BUYING_ROLES.find((r) => r.id === id).label).join(', ')}`, '');
+      for (const [k, t] of [['goals', 'Goals'], ['frustrations', 'Frustrations'], ['jobs', 'Jobs to be done'], ['tools', 'Tools & behaviours'], ['channels', 'Where to reach them']]) {
+        const xs = lines(p[k]);
+        if (xs.length) L.push(`**${t}:**`, ...xs.map((x) => `- ${x}`), '');
+      }
+      const tr = TRAITS.filter((t) => p.traits[t.id]).map((t) => `${t.left} ${'▮'.repeat(p.traits[t.id])}${'▯'.repeat(5 - p.traits[t.id])} ${t.right}`);
+      if (tr.length) L.push(...tr.map((x) => `- ${x}`), '');
+      L.push(`_Based on ${p.interviews || 0} interview(s)._`, '');
+    }
+  }
+  const v = idea.vpc;
+  if (v && [v.jobs, v.pains, v.gains, v.products, v.relievers, v.creators].some((x) => x.length)) {
+    const fit = vpcFit(v);
+    const seg = idea.personas?.find((p) => p.id === v.personaId);
+    L.push(`## Value Proposition Canvas${seg ? `: ${seg.name}` : ''}`, '', `**Fit:** ${fit.fit == null ? '–' : `${Math.round(fit.fit * 100)}%`} of pain/gain weight addressed · **Great-VP checklist:** ${fit.great}/10`, '');
+    const list = (title, xs, wl) => {
+      if (!xs.length) return;
+      L.push(`**${title}**`, ...xs.map((x) => `- ${x.text}${x.weight ? ` _(${wl} ${x.weight})_` : ''}`), '');
+    };
+    list('Customer jobs', [...v.jobs].sort((a, b) => b.weight - a.weight), 'importance');
+    list('Pains', [...v.pains].sort((a, b) => b.weight - a.weight), 'severity');
+    list('Gains', [...v.gains].sort((a, b) => b.weight - a.weight), 'relevance');
+    list('Products & services', v.products);
+    const byId = Object.fromEntries([...v.pains, ...v.gains].map((x) => [x.id, x.text]));
+    list('Pain relievers', v.relievers.map((x) => ({text: `${x.text}${x.targets.length ? ` → ${x.targets.map((t) => byId[t]).join('; ')}` : ''}`})));
+    list('Gain creators', v.creators.map((x) => ({text: `${x.text}${x.targets.length ? ` → ${x.targets.map((t) => byId[t]).join('; ')}` : ''}`})));
+    if (fit.pains.gaps.length || fit.gains.gaps.length) list('Gaps (not addressed)', [...fit.pains.gaps, ...fit.gains.gaps]);
+    if (v.adlibs.length) L.push('**Value proposition statements**', ...v.adlibs.map((a) => `- ${a.fav ? '⭐ ' : ''}${adlibText(a)}`), '');
+    if (v.tests.length) {
+      L.push('**Test cards**', '', '| Hypothesis | Test | Metric | Pass if | Status | Learning |', '|---|---|---|---|---|---|');
+      const c = (x) => (x || '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+      v.tests.forEach((t) => L.push(`| ${c(t.hypothesis)} | ${c(t.test)} | ${c(t.metric)} | ${c(t.criteria)} | ${TEST_STATUS.find((x) => x.id === t.status).label} | ${c(t.learning)} |`));
+      L.push('');
+    }
+  }
   if (idea.concerns) L.push('## Additional concerns, assumptions, or observations', '', idea.concerns, '');
   L.push('_★ = critical criterion · scale 1 = very weak · 3 = uncertain/average · 5 = very strong_');
   return L.join('\n');

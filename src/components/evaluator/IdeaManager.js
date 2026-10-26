@@ -19,7 +19,7 @@ export default function IdeaManager({ideas, active, r, actions, setNotice}) {
   const {addIdea, select, remove, replaceAll} = actions;
 
   const share = async () => {
-    const url = `${window.location.origin}${window.location.pathname}#share=${encodeShare(active)}`;
+    const url = `${window.location.origin}${window.location.pathname}#share=${await encodeShare(active)}`;
     setNotice((await copy(url)) ? 'Share link copied. The idea lives inside the link, so anyone who opens it gets a copy.' : `Copy this link: ${url}`);
   };
   const copyMd = async () => setNotice((await copy(toMarkdown(active, r))) ? 'Markdown report copied to clipboard.' : 'Clipboard blocked. Use “Download .md” instead.');

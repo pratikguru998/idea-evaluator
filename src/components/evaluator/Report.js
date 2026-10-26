@@ -5,6 +5,9 @@ import {Meter, RedFlags, ValidateNext} from './Summary.js';
 import {FiveForcesDiagram} from './FiveForces.js';
 import {ThreeCDiagram} from './ThreeC.js';
 import {MarketCircles, MarketBars} from './MarketSizing.js';
+import {CanvasDiagram} from './ValueCanvas.js';
+import {PersonaCard} from './Personas.js';
+import {vpcFit, adlibText} from '../../lib/vpc.js';
 import {fmt, toneFor} from '../../lib/scoring.js';
 import {forcesSummary, threeC, marketSizing, attractivenessLabel, money} from '../../lib/frameworks.js';
 
@@ -65,6 +68,32 @@ export default function Report({idea, r, goTo}) {
         <h3>Perspective breakdown</h3>
         <div className="ie-lenses-wide"><LensPanel lenses={r.lenses} /></div>
       </div>
+
+      {idea.personas.length > 0 && (
+        <div className="ie-card">
+          <div className="ie-card-head"><h3>🧑 Personas</h3><Edit tab="personas" /></div>
+          <div className="ie-persona-grid">
+            {[...idea.personas].sort((a, b) => Number(b.primary) - Number(a.primary)).map((p) => <PersonaCard key={p.id} p={p} />)}
+          </div>
+        </div>
+      )}
+
+      {(() => {
+        const v = idea.vpc;
+        const fit = vpcFit(v);
+        const fav = v.adlibs.find((a) => a.fav) || v.adlibs[0];
+        if (![v.jobs, v.pains, v.gains, v.products, v.relievers, v.creators].some((x) => x.length)) return null;
+        return (
+          <div className="ie-card">
+            <div className="ie-card-head">
+              <h3>💎 Value Proposition Canvas · fit {fit.fit == null ? '–' : `${Math.round(fit.fit * 100)}%`}</h3>
+              <Edit tab="vpc" />
+            </div>
+            {fav && <p className="ie-adlib-text">“{adlibText(fav)}”</p>}
+            <CanvasDiagram v={v} segment={idea.personas.find((p) => p.id === v.personaId)} />
+          </div>
+        );
+      })()}
 
       <div className="ie-grid-2">
         <div className="ie-card">

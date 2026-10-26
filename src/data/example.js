@@ -33,5 +33,72 @@ export const EXAMPLE = {
     tam: '', sam: '', som: '', goal: '1000000',
     source: 'US freelance designers ≈ 1.5M (Upwork/BLS estimates). $15/mo plan. SAM = English-speaking, self-filing, already using online banking.',
   },
+  personas: [
+    {
+      id: 'fiona', name: 'Freelance Fiona', avatar: '👩‍💻', color: '#4f46e5', primary: true,
+      role: 'Solo brand & web designer', age: '29–38', location: 'Austin, US', budget: 'Up to $20/month', interviews: '9',
+      quote: 'I became a designer to design, not to chase receipts every April.',
+      bio: 'Six years freelance with 8–12 active clients and roughly $110k a year. Does her own books in a spreadsheet and pays a CPA once a year to file.',
+      goals: 'Know exactly how much to set aside for tax\nSpend under 15 minutes a month on admin\nLook professional to bigger clients',
+      frustrations: 'Tax season panic and late-filing penalties\nCategorising hundreds of card transactions by hand\nGeneric tools full of accounting jargon',
+      jobs: 'Track income and expenses\nEstimate quarterly taxes\nSend invoices and chase late payments',
+      tools: 'Google Sheets, Stripe, PayPal, a business debit card\nWatches YouTube “freelance finance” videos',
+      channels: 'Designer Slack/Discord communities\nDribbble & Instagram\nThe “Freelance Friday” newsletter',
+      roles: ['user', 'buyer', 'decider'], traits: {price: 2, adoption: 4, diy: 4, tech: 4, risk: 2},
+      day: 'It is the 10th of April. Fiona has three client deadlines and 640 unlabelled transactions. She blocks a whole weekend, gets half-way, and books the CPA late at a rush fee.',
+    },
+    {
+      id: 'agency', name: 'Studio Sam', avatar: '🏢', color: '#0ea5e9',
+      role: 'Owner of a 3-person design studio', age: '35–45', location: 'Remote, UK/US', budget: '$50–100/month', interviews: '3',
+      quote: 'I need my accountant and my team on the same page without three tools.',
+      goals: 'Clean books an accountant can sign off quickly\nSee profitability per client',
+      frustrations: 'Contractors’ receipts arrive by email, WhatsApp and paper\nCurrent tool is built for retail shops',
+      roles: ['buyer', 'decider'], traits: {price: 4, adoption: 3, diy: 2, tech: 3, risk: 3},
+    },
+  ],
+  vpc: {
+    personaId: 'fiona',
+    jobs: [
+      {id: 'j1', text: 'Keep books tax-ready all year', type: 'functional', weight: 5},
+      {id: 'j2', text: 'Estimate and pay quarterly taxes', type: 'functional', weight: 4},
+      {id: 'j3', text: 'Feel in control of money, not anxious', type: 'emotional', weight: 4},
+      {id: 'j4', text: 'Look like a “real business” to clients', type: 'social', weight: 3},
+    ],
+    pains: [
+      {id: 'p1', text: 'Spends 10+ hours categorising transactions at tax time', type: 'outcome', weight: 5},
+      {id: 'p2', text: 'Late-filing or underpayment penalties', type: 'risk', weight: 5},
+      {id: 'p3', text: 'Accounting jargon she doesn’t understand', type: 'obstacle', weight: 3},
+      {id: 'p4', text: 'Receipts scattered across email and phone', type: 'obstacle', weight: 3},
+    ],
+    gains: [
+      {id: 'g1', text: 'Knows the tax set-aside amount at any moment', type: 'desired', weight: 5},
+      {id: 'g2', text: 'Under 15 minutes of admin per month', type: 'desired', weight: 4},
+      {id: 'g3', text: 'Accountant-ready export in one click', type: 'expected', weight: 3},
+      {id: 'g4', text: 'Insights on which clients are most profitable', type: 'unexpected', weight: 2},
+    ],
+    products: [
+      {id: 'x1', text: 'Web + mobile app with bank feed', type: 'digital'},
+      {id: 'x2', text: 'AI categorisation trained on creative-business expenses', type: 'digital'},
+      {id: 'x3', text: 'Year-end CPA handoff service', type: 'service'},
+    ],
+    relievers: [
+      {id: 'r1', text: 'Auto-categorises 95% of transactions daily', targets: ['p1']},
+      {id: 'r2', text: 'Quarterly tax reminders with exact amount due', targets: ['p2']},
+      {id: 'r3', text: 'Plain-English labels, no debits/credits', targets: ['p3']},
+    ],
+    creators: [
+      {id: 'c1', text: 'Live “safe to spend / set aside for tax” dashboard', targets: ['g1']},
+      {id: 'c2', text: '10-minute monthly review flow', targets: ['g2']},
+      {id: 'c3', text: 'One-click CPA export pack', targets: ['g3']},
+    ],
+    adlibs: [
+      {id: 'a1', fav: true, product: 'AI bookkeeping app', segment: 'freelance designers', job: 'keep tax-ready books without the admin', verb1: 'eliminating', pain: 'tax-season categorising marathons', verb2: 'showing', gain: 'exactly what to set aside for tax every day', competitor: 'generic tools built for shops'},
+    ],
+    great: [1, 2, 3, 4, 5],
+    stages: {ps: {done: true, note: '9 interviews confirm tax-time pain; 3 said they would pay $15/mo.'}},
+    tests: [
+      {id: 't1', hypothesis: 'Freelance designers will pre-pay for a tax-ready bookkeeping app.', test: 'Landing page in two designer communities with a $49 founding-member annual pre-sale.', metric: 'Pre-sales from 1,000 visitors', criteria: '≥ 20 pre-sales (2%)', learning: '', status: 'running'},
+    ],
+  },
   concerns: 'Big incumbents could add the same AI categorisation. Need to test whether "made for designers" positioning matters or if this is just generic bookkeeping.',
 };
