@@ -16,6 +16,8 @@ const config = {
   onBrokenLinks: 'throw',
   markdown: {hooks: {onBrokenMarkdownLinks: 'throw'}},
   i18n: {defaultLocale: 'en', locales: ['en']},
+  // OAuth client ID for "Save to Google Drive" (public, not a secret). Without one the button explains how to set it up.
+  customFields: {googleClientId: process.env.GOOGLE_CLIENT_ID || ''},
   presets: [
     [
       'classic',
@@ -43,7 +45,7 @@ const config = {
       },
       footer: {
         style: 'dark',
-        copyright: 'Idea Evaluator · free, static, private. Your ideas never leave your browser.',
+        copyright: 'Idea Evaluator · free, static, private. Your ideas stay in your browser unless you save them to your own Google Drive.',
       },
       prism: {theme: prismThemes.github, darkTheme: prismThemes.dracula},
     }),
