@@ -4,6 +4,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {blankIdea, download, encodeShare, newId, normalize, slug, toMarkdown} from '../../lib/store.js';
 import {FOLDER_NAME, saveToDrive} from '../../lib/drive.js';
 import {EXAMPLE} from '../../data/example.js';
+import {GUMROAD} from '../../data/gumroad.js';
 
 async function copy(text) {
   try {
@@ -72,6 +73,8 @@ export default function IdeaManager({ideas, active, r, actions, setNotice}) {
         <button type="button" className="ie-btn" onClick={() => addIdea(blankIdea(`Idea ${ideas.length + 1}`))}>＋ New</button>
         <button type="button" className="ie-btn" onClick={() => addIdea({...active, id: newId(), name: `${active.name} (copy)`, updated: Date.now()})}>⧉ Duplicate</button>
         <button type="button" className="ie-btn" onClick={() => addIdea(normalize({...EXAMPLE, id: newId()}))}>✨ Example</button>
+        <button type="button" className="ie-btn" title="Case study: Gumroad, fully filled in including the Business Model Canvas"
+          onClick={() => addIdea(normalize({...GUMROAD, id: newId()}))}>🛍 Gumroad case study</button>
         <button type="button" className="ie-btn ie-btn-danger"
           onClick={() => window.confirm(`Delete “${active.name}” from this browser?`) && remove(active.id)}>🗑 Delete</button>
         {ideas.length > 1 && <Link className="ie-btn" to="/compare">⚖️ Compare</Link>}
